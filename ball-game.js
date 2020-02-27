@@ -8,8 +8,8 @@ var ballRadius = 25;
 var x = canvas.width / 2;
 var y = canvas.height - 300;
 
-var dx = 1;
-var dy = -1;
+var dx = 2;
+var dy = -2;
 
 var paddleHeight = 10;
 var paddleWidth = 75;
@@ -36,6 +36,10 @@ for(var c = 0; c < brickColumnCount; c++) {
 
 var brickX = (c*(brickWidth + brickPadding)) + brickOffsetLeft;
 var brickY = (r*(brickHeight + brickPadding)) + brickOffsetTop;
+
+var score = 0;
+
+var lives = 3;
 
 function drawBall() {
   ctx.beginPath();
@@ -76,6 +80,8 @@ function draw(){
   drawBricks();
   drawBall();
   drawPaddle();
+  drawScore();
+  drawLives();
   collisionDetection();
   x += dx;
   y += dy;
@@ -99,11 +105,21 @@ function draw(){
     if(x > paddleX && x < paddleX + paddleWidth) {
       dy = -dy;
     } else {
-      alert("GAME OVER");
-      document.location.reload();
-      clearInterval(interval);
+      lives--;
+      if(!lives) {
+        alert("GAME OVER");
+        document.location.reload();
+      }
+      else {
+        x = canvas.width / 2;
+        y = canvas.height - 30;
+        dx = 2;
+        dy = -2;
+        paddleX = (canvas.width - paddleWidth) / 2;
+      }
     }
   }
+  requestAnimationFrame(draw);
 }
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
@@ -113,7 +129,7 @@ function keyDownHandler(e) {
     rightPressed = true;
   } else if(e.key == "Left" || e.key == "ArrowLeft") {
     leftPressed = true;
-}
+  }
 }
 
 function keyUpHandler(e) {
@@ -132,10 +148,29 @@ function collisionDetection() {
         if(x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight) {
           dy = -dy;
           b.status = 0;
+          score++;
+          if(score == brickRowCount*brickColumnCount) {
+            alert("YOU WIN, CONGRATULATIONS!");
+            
+            document.location.reload();
+            
+          }
         }
       }
     }
   }
 }
 
-var interval = setInterval(draw, 10);
+function drawScore() {
+  ctx.font = "16px Arial";
+  ctx.fillStyle = "#0095DD";
+  ctx.fillText("Score: " + score, 8, 20);
+}
+
+function drawLives() {
+  ctx.font = "16px Arial";
+  ctx.fillStyle = "0095DD";
+  ctx.fillText("Lives: " + lives, canvas.width - 65, 20);
+}
+
+draw();
